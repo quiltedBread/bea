@@ -2,7 +2,7 @@
 
 A tool for visualizing regional industry data from the U.S. Bureau of Economic Analysis (BEA) writting in TypeScript
 
-## Quick Start
+## Run Locally
 
 In the project directory, run:
 

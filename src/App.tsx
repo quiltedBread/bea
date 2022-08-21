@@ -2,46 +2,44 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import { stateFIPS, countyFIPS } from "./FIPS";
 import { LineCode, LineCodeResults } from "./types";
-import { formatLineCodeData } from "./utils";
+import {
+    API,
+    parseLineCodes,
+    formatLineCodeDesc,
+    formatLineCodeData,
+} from "./utils";
+import Box from "@mui/material/Box";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 import LineChart from "./components/LineChart";
 
-const API =
-    "https://apps.bea.gov/api/data/?UserID=B2E7AD45-4F99-4BF2-8222-D0818042762F";
-
 function App() {
-    const [state, setState] = useState<keyof typeof stateFIPS | undefined>();
-    const [county, setCounty] = useState<keyof typeof countyFIPS | undefined>();
+    const [state, setState] = useState<string>("");
+    const [county, setCounty] = useState<string>("");
     const [countyChoices, setCountyChoices] = useState<string[]>([]);
     const [lineCodes, setLineCodes] = useState<LineCode[]>([]);
-    const [lineCode, setLineCode] = useState<string | undefined>();
+    const [lineCode, setLineCode] = useState<string>("");
     const [lineCodeResults, setLineCodeResults] = useState<
         LineCodeResults | undefined
     >();
     const [totalResults, setTotalResults] = useState<
         LineCodeResults | undefined
     >();
-
-    console.log(lineCode);
-    // console.log(lineCodeResult?.Data.map((e) => e.TimePeriod));
-    // console.log(lineCodeResult?.Data.map((e) => e.DataValue));
-    // console.log(lineCodeResults?.Data.map((e) => e.CL_UNIT));
-    // if (lineCodeResults) {
-    //     console.log(formatLineCodeData(lineCodeResults.Data));
-    // }
-
     useEffect(() => {
         fetch(
             `${API}&method=GetParameterValuesFiltered&datasetname=Regional&TargetParameter=LineCode&TableName=CAEMP25N`
         )
             .then((res) => res.json())
             .then((data) => {
-                setLineCodes(data.BEAAPI.Results.ParamValue);
+                setLineCodes(parseLineCodes(data.BEAAPI.Results.ParamValue));
             });
     }, []);
 
-    const handleStateChange = (e: React.SyntheticEvent) => {
-        const selected = (e.target as HTMLSelectElement).value;
+    const handleStateChange = (e: SelectChangeEvent) => {
+        const selected = e.target.value as string;
         setState(selected);
         setCountyChoices(getStateCounties(selected));
     };
@@ -58,8 +56,8 @@ function App() {
         return counties;
     };
 
-    const handleCountyChange = (e: React.SyntheticEvent) => {
-        const selected = (e.target as HTMLSelectElement).value;
+    const handleCountyChange = (e: SelectChangeEvent) => {
+        const selected = e.target.value as string;
         setCounty(selected);
         // get total employment data for county
         fetch(
@@ -69,8 +67,8 @@ function App() {
             .then((data) => setTotalResults(data.BEAAPI.Results));
     };
 
-    const handleLineCodeChange = (e: React.SyntheticEvent) => {
-        const selected = (e.target as HTMLSelectElement).value;
+    const handleLineCodeChange = (e: SelectChangeEvent) => {
+        const selected = e.target.value as string;
         setLineCode(selected);
         fetch(
             `${API}&method=GetData&datasetname=Regional&TableName=CAEMP25N&LineCode=${selected}&GeoFIPS=${county}&year=ALL`
@@ -81,44 +79,115 @@ function App() {
 
     return (
         <div className="App">
-            <select onChange={handleStateChange} value={state}>
-                {Object.keys(stateFIPS)
-                    .sort()
-                    .map((k) => (
-                        <option key={k} value={k}>
-                            {stateFIPS[k]}
-                        </option>
-                    ))}
-            </select>
-            <select onChange={handleCountyChange} value={county}>
-                {countyChoices.map((k) => (
-                    <option key={k} value={k}>
-                        {countyFIPS[k]}
-                    </option>
-                ))}
-            </select>
-            <select onChange={handleLineCodeChange} value={lineCode}>
-                {lineCodes.length > 0 &&
-                    lineCodes.map((e) => (
-                        <option key={e.Key} value={e.Key}>
-                            {e.Desc}
-                        </option>
-                    ))}
-            </select>
-            {lineCodeResults && (
-                <LineChart
-                    labels={lineCodeResults.Data.map((e) => e.TimePeriod)}
-                    datasets={[
-                        {
-                            label: lineCodeResults.Statistic,
-                            data: formatLineCodeData(lineCodeResults.Data),
-                            backgroundColor: ["rgba(255, 99, 132, 0.2)"],
-                            borderColor: ["rgba(255, 99, 132, 1)"],
-                            borderWidth: 3,
-                        },
-                    ]}
-                />
-            )}
+            <header></header>
+            <div className="content">
+                <FormControl sx={{ margin: "10px 0px" }}>
+                    <InputLabel id="state-select-label">State</InputLabel>
+                    <Select
+                        labelId="state-select-label"
+                        onChange={handleStateChange}
+                        value={state}
+                        label="State"
+                        id="state-select"
+                        autoWidth
+                    >
+                        {Object.keys(stateFIPS)
+                            .sort()
+                            .map((k) => (
+                                <MenuItem key={k} value={k}>
+                                    <div
+                                        style={{
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {stateFIPS[k]}
+                                    </div>
+                                </MenuItem>
+                            ))}
+                    </Select>
+                </FormControl>
+                <FormControl
+                    sx={{ marginBottom: "10px" }}
+                    disabled={countyChoices.length < 1}
+                >
+                    <InputLabel id="county-select-label">County</InputLabel>
+                    <Select
+                        labelId="county-select-label"
+                        onChange={handleCountyChange}
+                        value={county}
+                        label="County"
+                        id="county-select"
+                        autoWidth
+                    >
+                        {countyChoices.map((k) => (
+                            <MenuItem key={k} value={k}>
+                                <div
+                                    style={{
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                    }}
+                                >
+                                    {countyFIPS[k]}
+                                </div>
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl
+                    sx={{ marginBottom: "10px" }}
+                    disabled={countyChoices.length < 1}
+                >
+                    <InputLabel id="linecode-select-label">Industry</InputLabel>
+                    <Select
+                        labelId="linecode-select-label"
+                        onChange={handleLineCodeChange}
+                        value={lineCode}
+                        label="Industry"
+                        id="linecode-select"
+                        // autoWidth
+                    >
+                        {lineCodes.length > 0 &&
+                            lineCodes.map((e) => (
+                                <MenuItem key={e.Key} value={e.Key}>
+                                    <div
+                                        style={{
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {e.Desc}
+                                    </div>
+                                </MenuItem>
+                            ))}
+                    </Select>
+                </FormControl>
+                {lineCodeResults && totalResults && (
+                    <LineChart
+                        labels={lineCodeResults.Data.map((e) => e.TimePeriod)}
+                        datasets={[
+                            {
+                                label: formatLineCodeDesc(
+                                    totalResults.Statistic
+                                ),
+                                data: formatLineCodeData(totalResults.Data),
+                                backgroundColor: ["rgba(83, 182, 228, 0.2)"],
+                                borderColor: ["rgba(83, 182, 228, 1)"],
+                                borderWidth: 3,
+                            },
+                            {
+                                label: formatLineCodeDesc(
+                                    lineCodeResults.Statistic
+                                ),
+                                data: formatLineCodeData(lineCodeResults.Data),
+                                backgroundColor: ["rgba(244, 181, 75, 0.2)"],
+                                borderColor: ["rgba(244, 181, 75, 1)"],
+                                borderWidth: 3,
+                            },
+                        ]}
+                    />
+                )}
+            </div>
         </div>
     );
 }

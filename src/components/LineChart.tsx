@@ -29,13 +29,26 @@ interface LineChartProps {
 
 export default function LineChart(props: LineChartProps) {
     return (
-        <div style={{ width: "70vw" }}>
+        <div className="linechart">
             <Line
                 options={{
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: "top" as const,
+                            position: "bottom" as const,
+                            align: "start" as const,
+                        },
+                    },
+                    scales: {
+                        yAxes: {
+                            grid: { display: false },
+                        },
+                        xAxes: {
+                            grid: { display: false },
+                            time: {
+                                tooltipFormat: "ll",
+                            },
                         },
                     },
                 }}

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import { stateFIPS, countyFIPS } from "./FIPS";
 import { LineCode, LineCodeResults } from "./types";
+import { formatLineCodeData } from "./utils";
 
 import LineChart from "./components/LineChart";
 
@@ -14,10 +15,20 @@ function App() {
     const [countyChoices, setCountyChoices] = useState<string[]>([]);
     const [lineCodes, setLineCodes] = useState<LineCode[]>([]);
     const [lineCode, setLineCode] = useState<string | undefined>();
-    const [lineCodeData, setLineCodeData] = useState<
+    const [lineCodeResults, setLineCodeResults] = useState<
         LineCodeResults | undefined
     >();
-    console.log(lineCodeData);
+    const [totalResults, setTotalResults] = useState<
+        LineCodeResults | undefined
+    >();
+
+    console.log(lineCode);
+    // console.log(lineCodeResult?.Data.map((e) => e.TimePeriod));
+    // console.log(lineCodeResult?.Data.map((e) => e.DataValue));
+    // console.log(lineCodeResults?.Data.map((e) => e.CL_UNIT));
+    // if (lineCodeResults) {
+    //     console.log(formatLineCodeData(lineCodeResults.Data));
+    // }
 
     useEffect(() => {
         fetch(
@@ -47,6 +58,17 @@ function App() {
         return counties;
     };
 
+    const handleCountyChange = (e: React.SyntheticEvent) => {
+        const selected = (e.target as HTMLSelectElement).value;
+        setCounty(selected);
+        // get total employment data for county
+        fetch(
+            `${API}&method=GetData&datasetname=Regional&TableName=CAEMP25N&LineCode=10&GeoFIPS=${selected}&year=ALL`
+        )
+            .then((res) => res.json())
+            .then((data) => setTotalResults(data.BEAAPI.Results));
+    };
+
     const handleLineCodeChange = (e: React.SyntheticEvent) => {
         const selected = (e.target as HTMLSelectElement).value;
         setLineCode(selected);
@@ -54,7 +76,7 @@ function App() {
             `${API}&method=GetData&datasetname=Regional&TableName=CAEMP25N&LineCode=${selected}&GeoFIPS=${county}&year=ALL`
         )
             .then((res) => res.json())
-            .then((data) => setLineCodeData(data.BEAAPI.Results));
+            .then((data) => setLineCodeResults(data.BEAAPI.Results));
     };
 
     return (
@@ -68,22 +90,14 @@ function App() {
                         </option>
                     ))}
             </select>
-            <select
-                onChange={(e) => setCounty(e.target.value)}
-                value={county}
-                placeholder="County"
-            >
+            <select onChange={handleCountyChange} value={county}>
                 {countyChoices.map((k) => (
                     <option key={k} value={k}>
                         {countyFIPS[k]}
                     </option>
                 ))}
             </select>
-            <select
-                onChange={handleLineCodeChange}
-                value={county}
-                placeholder="County"
-            >
+            <select onChange={handleLineCodeChange} value={lineCode}>
                 {lineCodes.length > 0 &&
                     lineCodes.map((e) => (
                         <option key={e.Key} value={e.Key}>
@@ -91,16 +105,16 @@ function App() {
                         </option>
                     ))}
             </select>
-            {lineCodeData && (
+            {lineCodeResults && (
                 <LineChart
-                    labels={lineCodeData.Data.map((e) => e.TimePeriod)}
+                    labels={lineCodeResults.Data.map((e) => e.TimePeriod)}
                     datasets={[
                         {
-                            label: lineCodeData.Statistic,
-                            data: lineCodeData.Data.map((e) => e.DataValue),
+                            label: lineCodeResults.Statistic,
+                            data: formatLineCodeData(lineCodeResults.Data),
                             backgroundColor: ["rgba(255, 99, 132, 0.2)"],
                             borderColor: ["rgba(255, 99, 132, 1)"],
-                            borderWidth: 1,
+                            borderWidth: 3,
                         },
                     ]}
                 />

@@ -21,8 +21,8 @@ export interface LineCodeResult {
     GeoName: string;
     TimePeriod: string;
     CL_UNIT: string;
-    UNIT_MULT: number;
-    DataValue: number;
+    UNIT_MULT: string;
+    DataValue: string;
 }
 export interface LineCodeResults {
     Statistic: string;

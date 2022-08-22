@@ -1,21 +1,22 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
-import { stateFIPS, countyFIPS } from "./FIPS";
+import { useState, useEffect } from "react";
+import Box from "@mui/material/Box";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { Paper } from "@mui/material";
+import GitHubIcon from "@mui/icons-material/GitHub";
+
 import { LineCode, LineCodeResults } from "./types";
 import {
     API,
     parseLineCodes,
     formatLineCodeDesc,
     formatLineCodeData,
+    stateFIPS,
+    countyFIPS,
 } from "./utils";
-import Box from "@mui/material/Box";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
-
 import LineChart from "./components/LineChart";
-import { Paper } from "@mui/material";
 
 function App() {
     const [state, setState] = useState<string>("");
@@ -80,20 +81,31 @@ function App() {
     };
 
     return (
-        <div className="App">
-            <header>BEA Demo</header>
-            <p className="description">
-                This application uses the BEA (Bureau of Economic Analysis)
-                regional dataset. Selecting a state, county and industry will
-                render a chart comparing the growth rates of the selected
-                industry and the total employment of the county.
-            </p>
-            <p className="description">
-                Notes: This API is rate limited and extensive usage may result
-                time-out period of one hour. If the BEA is missing data, the
-                chart is backfilled with the first available year's value.
-            </p>
+        <>
+            <header>
+                <a href="https://github.com/quiltedBread/bea" target="_blank">
+                    <GitHubIcon />
+                </a>
+            </header>
             <div className="content">
+                <p>
+                    This application uses the BEA (Bureau of Economic Analysis)
+                    <a
+                        href="https://www.bea.gov/data/employment/employment-county-metro-and-other-areas"
+                        target="_blank"
+                    >
+                        regional dataset
+                    </a>
+                    . Selecting a state, county and industry will render a chart
+                    comparing the selected industry and total employment within
+                    the county.
+                </p>
+                <div className="disclaimer">
+                    <i>
+                        Note: This API is rate limited and extensive use may
+                        result in a time-out period of one hour.
+                    </i>
+                </div>
                 <FormControl sx={{ margin: "10px 0px" }}>
                     <InputLabel id="state-select-label">State</InputLabel>
                     <Select
@@ -158,7 +170,6 @@ function App() {
                         value={lineCode}
                         label="Industry"
                         id="linecode-select"
-                        // autoWidth
                     >
                         {lineCodes.length > 0 &&
                             lineCodes.map((e) => (
@@ -176,7 +187,10 @@ function App() {
                     </Select>
                 </FormControl>
                 {lineCodeResults && totalResults && (
-                    <Paper elevation={3} sx={{ padding: "10px" }}>
+                    <Paper
+                        elevation={3}
+                        sx={{ padding: "10px", margin: "10px 0" }}
+                    >
                         <LineChart
                             labels={lineCodeResults.Data.map(
                                 (e) => e.TimePeriod
@@ -211,7 +225,7 @@ function App() {
                     </Paper>
                 )}
             </div>
-        </div>
+        </>
     );
 }
 

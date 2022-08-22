@@ -1,3 +1,11 @@
+TODO
+
+graph toggles:
+
+percent, 
+
+
+
 county industry growth
  - get industries w linecodes
 https://apps.bea.gov/api/data/?UserID=B2E7AD45-4F99-4BF2-8222-D0818042762F&method=GetParameterValuesFiltered&datasetname=Regional&TargetParameter=LineCode&TableName=CAEMP25N

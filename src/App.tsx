@@ -15,6 +15,7 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 import LineChart from "./components/LineChart";
+import { Paper } from "@mui/material";
 
 function App() {
     const [state, setState] = useState<string>("");
@@ -41,6 +42,7 @@ function App() {
     const handleStateChange = (e: SelectChangeEvent) => {
         const selected = e.target.value as string;
         setState(selected);
+        setCounty("");
         setCountyChoices(getStateCounties(selected));
     };
 
@@ -79,7 +81,18 @@ function App() {
 
     return (
         <div className="App">
-            <header></header>
+            <header>BEA Demo</header>
+            <p className="description">
+                This application uses the BEA (Bureau of Economic Analysis)
+                regional dataset. Selecting a state, county and industry will
+                render a chart comparing the growth rates of the selected
+                industry and the total employment of the county.
+            </p>
+            <p className="description">
+                Notes: This API is rate limited and extensive usage may result
+                time-out period of one hour. If the BEA is missing data, the
+                chart is backfilled with the first available year's value.
+            </p>
             <div className="content">
                 <FormControl sx={{ margin: "10px 0px" }}>
                     <InputLabel id="state-select-label">State</InputLabel>
@@ -163,29 +176,39 @@ function App() {
                     </Select>
                 </FormControl>
                 {lineCodeResults && totalResults && (
-                    <LineChart
-                        labels={lineCodeResults.Data.map((e) => e.TimePeriod)}
-                        datasets={[
-                            {
-                                label: formatLineCodeDesc(
-                                    totalResults.Statistic
-                                ),
-                                data: formatLineCodeData(totalResults.Data),
-                                backgroundColor: ["rgba(83, 182, 228, 0.2)"],
-                                borderColor: ["rgba(83, 182, 228, 1)"],
-                                borderWidth: 3,
-                            },
-                            {
-                                label: formatLineCodeDesc(
-                                    lineCodeResults.Statistic
-                                ),
-                                data: formatLineCodeData(lineCodeResults.Data),
-                                backgroundColor: ["rgba(244, 181, 75, 0.2)"],
-                                borderColor: ["rgba(244, 181, 75, 1)"],
-                                borderWidth: 3,
-                            },
-                        ]}
-                    />
+                    <Paper elevation={3} sx={{ padding: "10px" }}>
+                        <LineChart
+                            labels={lineCodeResults.Data.map(
+                                (e) => e.TimePeriod
+                            )}
+                            datasets={[
+                                {
+                                    label: formatLineCodeDesc(
+                                        totalResults.Statistic
+                                    ),
+                                    data: formatLineCodeData(totalResults.Data),
+                                    backgroundColor: [
+                                        "rgba(83, 182, 228, 0.2)",
+                                    ],
+                                    borderColor: ["rgba(83, 182, 228, 1)"],
+                                    borderWidth: 3,
+                                },
+                                {
+                                    label: formatLineCodeDesc(
+                                        lineCodeResults.Statistic
+                                    ),
+                                    data: formatLineCodeData(
+                                        lineCodeResults.Data
+                                    ),
+                                    backgroundColor: [
+                                        "rgba(244, 181, 75, 0.2)",
+                                    ],
+                                    borderColor: ["rgba(244, 181, 75, 1)"],
+                                    borderWidth: 3,
+                                },
+                            ]}
+                        />
+                    </Paper>
                 )}
             </div>
         </div>

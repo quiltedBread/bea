@@ -29,34 +29,39 @@ interface LineChartProps {
 
 export default function LineChart(props: LineChartProps) {
     return (
-        <div className="linechart">
-            <Line
-                options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: "bottom" as const,
-                            align: "start" as const,
-                        },
-                    },
-                    scales: {
-                        yAxes: {
-                            grid: { display: false },
-                        },
-                        xAxes: {
-                            grid: { display: false },
-                            time: {
-                                tooltipFormat: "ll",
+        <>
+            <div className="linechart__title">
+                {props.datasets[1].label} (Percent Change)
+            </div>
+            <div className="linechart">
+                <Line
+                    options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: "bottom" as const,
+                                align: "start" as const,
                             },
                         },
-                    },
-                }}
-                data={{
-                    labels: props.labels,
-                    datasets: props.datasets,
-                }}
-            />
-        </div>
+                        scales: {
+                            yAxes: {
+                                grid: { display: false },
+                            },
+                            xAxes: {
+                                grid: { display: false },
+                                time: {
+                                    tooltipFormat: "ll",
+                                },
+                            },
+                        },
+                    }}
+                    data={{
+                        labels: props.labels,
+                        datasets: props.datasets,
+                    }}
+                />
+            </div>
+        </>
     );
 }

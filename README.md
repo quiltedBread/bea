@@ -1,6 +1,6 @@
 # BEA Demo
 
-A tool for visualizing regional industry data from the U.S. Bureau of Economic Analysis (BEA) writting in TypeScript
+A tool for visualizing regional industry data from the U.S. Bureau of Economic Analysis (BEA) writting in TypeScript. See demo [here](https://bea-demo-site.netlify.app/)
 
 ## Run Locally
 

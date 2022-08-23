@@ -87,38 +87,67 @@ function App() {
                     <GitHubIcon />
                 </a>
             </header>
-            <div className="content">
-                <p>
-                    This application uses the BEA (Bureau of Economic Analysis)
-                    <a
-                        href="https://www.bea.gov/data/employment/employment-county-metro-and-other-areas"
-                        target="_blank"
+            <div className="content-wrapper">
+                <div className="content">
+                    <p>
+                        This application uses the BEA (Bureau of Economic
+                        Analysis)&nbsp;
+                        <a
+                            href="https://www.bea.gov/data/employment/employment-county-metro-and-other-areas"
+                            target="_blank"
+                        >
+                            regional dataset
+                        </a>
+                        . Selecting a state, county and industry will render a
+                        chart comparing the selected industry and total
+                        employment within the county.
+                    </p>
+                    <div className="disclaimer">
+                        <i>
+                            Note: This API is rate limited and extensive use may
+                            result in a time-out period of one hour.
+                        </i>
+                    </div>
+                    <FormControl sx={{ margin: "10px 0px" }}>
+                        <InputLabel id="state-select-label">State</InputLabel>
+                        <Select
+                            labelId="state-select-label"
+                            onChange={handleStateChange}
+                            value={state}
+                            label="State"
+                            id="state-select"
+                            autoWidth
+                        >
+                            {Object.keys(stateFIPS)
+                                .sort()
+                                .map((k) => (
+                                    <MenuItem key={k} value={k}>
+                                        <div
+                                            style={{
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                            }}
+                                        >
+                                            {stateFIPS[k]}
+                                        </div>
+                                    </MenuItem>
+                                ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl
+                        sx={{ marginBottom: "10px" }}
+                        disabled={countyChoices.length < 1}
                     >
-                        regional dataset
-                    </a>
-                    . Selecting a state, county and industry will render a chart
-                    comparing the selected industry and total employment within
-                    the county.
-                </p>
-                <div className="disclaimer">
-                    <i>
-                        Note: This API is rate limited and extensive use may
-                        result in a time-out period of one hour.
-                    </i>
-                </div>
-                <FormControl sx={{ margin: "10px 0px" }}>
-                    <InputLabel id="state-select-label">State</InputLabel>
-                    <Select
-                        labelId="state-select-label"
-                        onChange={handleStateChange}
-                        value={state}
-                        label="State"
-                        id="state-select"
-                        autoWidth
-                    >
-                        {Object.keys(stateFIPS)
-                            .sort()
-                            .map((k) => (
+                        <InputLabel id="county-select-label">County</InputLabel>
+                        <Select
+                            labelId="county-select-label"
+                            onChange={handleCountyChange}
+                            value={county}
+                            label="County"
+                            id="county-select"
+                            autoWidth
+                        >
+                            {countyChoices.map((k) => (
                                 <MenuItem key={k} value={k}>
                                     <div
                                         style={{
@@ -126,104 +155,82 @@ function App() {
                                             textOverflow: "ellipsis",
                                         }}
                                     >
-                                        {stateFIPS[k]}
+                                        {countyFIPS[k]}
                                     </div>
                                 </MenuItem>
                             ))}
-                    </Select>
-                </FormControl>
-                <FormControl
-                    sx={{ marginBottom: "10px" }}
-                    disabled={countyChoices.length < 1}
-                >
-                    <InputLabel id="county-select-label">County</InputLabel>
-                    <Select
-                        labelId="county-select-label"
-                        onChange={handleCountyChange}
-                        value={county}
-                        label="County"
-                        id="county-select"
-                        autoWidth
+                        </Select>
+                    </FormControl>
+                    <FormControl
+                        sx={{ marginBottom: "10px" }}
+                        disabled={countyChoices.length < 1}
                     >
-                        {countyChoices.map((k) => (
-                            <MenuItem key={k} value={k}>
-                                <div
-                                    style={{
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                    }}
-                                >
-                                    {countyFIPS[k]}
-                                </div>
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                <FormControl
-                    sx={{ marginBottom: "10px" }}
-                    disabled={countyChoices.length < 1}
-                >
-                    <InputLabel id="linecode-select-label">Industry</InputLabel>
-                    <Select
-                        labelId="linecode-select-label"
-                        onChange={handleLineCodeChange}
-                        value={lineCode}
-                        label="Industry"
-                        id="linecode-select"
-                    >
-                        {lineCodes.length > 0 &&
-                            lineCodes.map((e) => (
-                                <MenuItem key={e.Key} value={e.Key}>
-                                    <div
-                                        style={{
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                        }}
-                                    >
-                                        {e.Desc}
-                                    </div>
-                                </MenuItem>
-                            ))}
-                    </Select>
-                </FormControl>
-                {lineCodeResults && totalResults && (
-                    <Paper
-                        elevation={3}
-                        sx={{ padding: "10px", margin: "10px 0" }}
-                    >
-                        <LineChart
-                            labels={lineCodeResults.Data.map(
-                                (e) => e.TimePeriod
-                            )}
-                            datasets={[
-                                {
-                                    label: formatLineCodeDesc(
-                                        totalResults.Statistic
-                                    ),
-                                    data: formatLineCodeData(totalResults.Data),
-                                    backgroundColor: [
-                                        "rgba(83, 182, 228, 0.2)",
-                                    ],
-                                    borderColor: ["rgba(83, 182, 228, 1)"],
-                                    borderWidth: 3,
-                                },
-                                {
-                                    label: formatLineCodeDesc(
-                                        lineCodeResults.Statistic
-                                    ),
-                                    data: formatLineCodeData(
-                                        lineCodeResults.Data
-                                    ),
-                                    backgroundColor: [
-                                        "rgba(244, 181, 75, 0.2)",
-                                    ],
-                                    borderColor: ["rgba(244, 181, 75, 1)"],
-                                    borderWidth: 3,
-                                },
-                            ]}
-                        />
-                    </Paper>
-                )}
+                        <InputLabel id="linecode-select-label">
+                            Industry
+                        </InputLabel>
+                        <Select
+                            labelId="linecode-select-label"
+                            onChange={handleLineCodeChange}
+                            value={lineCode}
+                            label="Industry"
+                            id="linecode-select"
+                        >
+                            {lineCodes.length > 0 &&
+                                lineCodes.map((e) => (
+                                    <MenuItem key={e.Key} value={e.Key}>
+                                        <div
+                                            style={{
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                            }}
+                                        >
+                                            {e.Desc}
+                                        </div>
+                                    </MenuItem>
+                                ))}
+                        </Select>
+                    </FormControl>
+                    {lineCodeResults && totalResults && (
+                        <Paper
+                            elevation={3}
+                            sx={{ padding: "10px", margin: "10px 0" }}
+                        >
+                            <LineChart
+                                labels={lineCodeResults.Data.map(
+                                    (e) => e.TimePeriod
+                                )}
+                                datasets={[
+                                    {
+                                        label: formatLineCodeDesc(
+                                            totalResults.Statistic
+                                        ),
+                                        data: formatLineCodeData(
+                                            totalResults.Data
+                                        ),
+                                        backgroundColor: [
+                                            "rgba(83, 182, 228, 0.2)",
+                                        ],
+                                        borderColor: ["rgba(83, 182, 228, 1)"],
+                                        borderWidth: 3,
+                                    },
+                                    {
+                                        label: formatLineCodeDesc(
+                                            lineCodeResults.Statistic
+                                        ),
+                                        data: formatLineCodeData(
+                                            lineCodeResults.Data
+                                        ),
+                                        backgroundColor: [
+                                            "rgba(244, 181, 75, 0.2)",
+                                        ],
+                                        borderColor: ["rgba(244, 181, 75, 1)"],
+                                        borderWidth: 3,
+                                    },
+                                ]}
+                            />
+                        </Paper>
+                    )}
+                </div>
             </div>
         </>
     );

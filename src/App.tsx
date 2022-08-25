@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -30,6 +29,11 @@ function App() {
     const [totalResults, setTotalResults] = useState<
         LineCodeResults | undefined
     >();
+    // TODO toggle chart settings between start year and %/count mode
+    // const [chartMode, setChartMode] = useState<string>("");
+    // const [chartYear, setChartYear] = useState<string>("");
+    const [error, setError] = useState<string>("");
+
     useEffect(() => {
         fetch(
             `${API}&method=GetParameterValuesFiltered&datasetname=Regional&TargetParameter=LineCode&TableName=CAEMP25N`
@@ -45,6 +49,8 @@ function App() {
         setState(selected);
         setCounty("");
         setCountyChoices(getStateCounties(selected));
+        setLineCode("");
+        setLineCodeResults(undefined);
     };
 
     const getStateCounties = (state: keyof typeof stateFIPS) => {
@@ -67,7 +73,29 @@ function App() {
             `${API}&method=GetData&datasetname=Regional&TableName=CAEMP25N&LineCode=10&GeoFIPS=${selected}&year=ALL`
         )
             .then((res) => res.json())
-            .then((data) => setTotalResults(data.BEAAPI.Results));
+            .then((data) => {
+                if (Object.hasOwn(data.BEAAPI.Results, "Error")) {
+                    setError("Results Not Found");
+                } else {
+                    setTotalResults(data.BEAAPI.Results);
+                    setError("");
+                }
+            });
+        if (lineCode) {
+            // refetch linecode data
+            fetch(
+                `${API}&method=GetData&datasetname=Regional&TableName=CAEMP25N&LineCode=${lineCode}&GeoFIPS=${selected}&year=ALL`
+            )
+                .then((res) => res.json())
+                .then((data) => {
+                    if (Object.hasOwn(data.BEAAPI.Results, "Error")) {
+                        setError("Results Not Found");
+                    } else {
+                        setLineCodeResults(data.BEAAPI.Results);
+                        setError("");
+                    }
+                });
+        }
     };
 
     const handleLineCodeChange = (e: SelectChangeEvent) => {
@@ -77,7 +105,14 @@ function App() {
             `${API}&method=GetData&datasetname=Regional&TableName=CAEMP25N&LineCode=${selected}&GeoFIPS=${county}&year=ALL`
         )
             .then((res) => res.json())
-            .then((data) => setLineCodeResults(data.BEAAPI.Results));
+            .then((data) => {
+                if (Object.hasOwn(data.BEAAPI.Results, "Error")) {
+                    setError("Results Not Found");
+                } else {
+                    setLineCodeResults(data.BEAAPI.Results);
+                    setError("");
+                }
+            });
     };
 
     return (
@@ -190,6 +225,7 @@ function App() {
                                 ))}
                         </Select>
                     </FormControl>
+                    {error.length > 0 && <div className="error">{error}</div>}
                     {lineCodeResults && totalResults && (
                         <Paper
                             elevation={3}

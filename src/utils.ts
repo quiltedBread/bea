@@ -4,23 +4,14 @@ export const API =
     "https://apps.bea.gov/api/data/?UserID=B2E7AD45-4F99-4BF2-8222-D0818042762F";
 
 export function formatLineCodeData(data: LineCodeResult[], percent = true) {
-    let formatted: number[] = [];
-    for (let i = 0; i < data.length; i++) {
-        const value = parseFloat(data[i].DataValue.replace(",", ""));
-        if (isNaN(value)) {
-            if (i === 0) {
-                formatted.push(0);
-            } else {
-                formatted.push(formatted[formatted.length - 1]);
-            }
-        } else {
-            formatted.push(value);
-        }
-    }
+    const formatted: number[] = data.map((x) =>
+        parseFloat(x.DataValue.replace(",", ""))
+    );
     if (percent) {
-        const initialValue = formatted[0] > 0 ? formatted[0] : 1;
+        const initialValue = formatted.find((x) => !isNaN(x)) || 1;
         return formatted.map((x) => (x / initialValue) * 100 - 100);
     }
+    // console.log(formatted);
     return formatted;
 }
 

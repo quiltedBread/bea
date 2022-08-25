@@ -36,7 +36,7 @@ export default function LineChart(props: LineChartProps) {
             <div className="linechart">
                 <Line
                     options={{
-                        responsive: true,
+                        // responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
